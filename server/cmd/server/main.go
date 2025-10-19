@@ -1,19 +1,32 @@
 package main
 
 import (
+	"cortei-server/internal/config"
 	"cortei-server/internal/repository"
 	"cortei-server/internal/server"
 	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	repo := repository.NewInMemoryAppointmentRepository()
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error while loading .env file")
+	}
 
-	srv := server.NewServer(repo)
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Error loading config: %v", err)
+	}
 
-	log.Println("Servidor iniciado na porta :8080")
-	log.Println("Acesse o playground em: http://localhost:8080")
+	db := repository.InitDB(cfg.DBPath)
+	repo := repository.NewSQLiteRepository(db)
+	srv := server.NewServer(repo, cfg.ServerPort)
+
+	log.Printf("Server running on port %s, using SQLite in '%s'.", cfg.ServerPort, cfg.DBPath)
+	log.Printf("Access GraphQL playground at: http://localhost:%v", cfg.ServerPort)
 	if err := srv.ListenAndServe(); err != nil {
-		log.Fatalf("Erro ao iniciar o servidor: %v", err)
+		log.Fatalf("Error starting the server. Error %v", err)
 	}
 }

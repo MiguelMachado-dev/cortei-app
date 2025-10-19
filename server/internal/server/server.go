@@ -9,7 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
-func NewServer(repo repository.AppointmentRepository) *http.Server {
+func NewServer(repo repository.AppointmentRepository, port string) *http.Server {
 	// Cria o resolver com a dependência do repositório
 	resolver := &graph.Resolver{Repo: repo}
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
@@ -19,7 +19,7 @@ func NewServer(repo repository.AppointmentRepository) *http.Server {
 	mux.Handle("/query", srv)
 
 	return &http.Server{
-		Addr:    ":8080",
+		Addr:    port,
 		Handler: mux,
 	}
 }

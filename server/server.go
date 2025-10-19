@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cortei-server/graph"
+	"cortei-server/internal/graph"
 	"log"
 	"net/http"
 	"os"
