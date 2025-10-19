@@ -7,10 +7,21 @@ package graph
 import (
 	"context"
 	"cortei-server/internal/domain"
+	apperrors "cortei-server/internal/errors"
+	"cortei-server/internal/validation"
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // O gqlgen vai gerar a função CreateAppointment em `generated.go` e a implementa aqui.
-func (r *mutationResolver) CreateAppointment(ctx context.Context, input NewAppointmentInput) (*domain.Appointment, error) {
+func (r *mutationResolver) CreateAppointment(ctx context.Context, input domain.NewAppointment) (*domain.Appointment, error) {
+	if err := validation.ValidateNewAppointmentInput(input); err != nil {
+		return nil, err
+	}
+
 	newApp := &domain.Appointment{
 		ClientName: input.ClientName,
 		Date:       input.Date,
@@ -28,13 +39,44 @@ func (r *mutationResolver) CreateAppointment(ctx context.Context, input NewAppoi
 
 // DeleteAppointment is the resolver for the deleteAppointment field.
 func (r *mutationResolver) DeleteAppointment(ctx context.Context, id string) (bool, error) {
-	err := r.Repo.Delete(ctx, id)
-	return err == nil, err
+	uid, err := domain.ParseAppointmentID(strings.TrimSpace(id))
+	if err != nil {
+		return false, &apperrors.ValidationError{Field: "id", Message: "must be a valid UUID"}
+	}
+	if err := r.Repo.Delete(ctx, uid); err != nil {
+		var nf *gqlerror.Error
+		if errors.As(err, &nf) {
+			return false, nf
+		}
+		return false, fmt.Errorf("failed to delete appointment: %w", err)
+	}
+	return true, nil
 }
 
 // Appointments is the resolver for the appointments field.
 func (r *queryResolver) Appointments(ctx context.Context) ([]*domain.Appointment, error) {
 	return r.Repo.List(ctx)
+}
+
+// AppointmentsByDay is the resolver for the appointmentsByDay field.
+func (r *queryResolver) AppointmentsByDay(ctx context.Context, date string) (*domain.DailyAppointments, error) {
+	if strings.TrimSpace(date) == "" {
+		return nil, &apperrors.ValidationError{Field: "date", Message: "cannot be empty"}
+	}
+
+	appointments, err := r.Repo.GetByDay(ctx, date)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get appointments for date %s: %w", date, err)
+	}
+
+	appointmentValues := make([]domain.Appointment, len(appointments))
+	for i, app := range appointments {
+		appointmentValues[i] = *app
+	}
+
+	dailyAppointments := domain.GroupAppointmentsByDay(date, appointmentValues)
+
+	return &dailyAppointments, nil
 }
 
 // Mutation returns MutationResolver implementation.

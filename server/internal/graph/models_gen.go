@@ -5,11 +5,5 @@ package graph
 type Mutation struct {
 }
 
-type NewAppointmentInput struct {
-	ClientName string `json:"clientName"`
-	Date       string `json:"date"`
-	Time       string `json:"time"`
-}
-
 type Query struct {
 }

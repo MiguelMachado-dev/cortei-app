@@ -1,6 +1,10 @@
 package graph
 
-import "cortei-server/internal/repository"
+//go:generate go run github.com/99designs/gqlgen generate
+
+import (
+	"cortei-server/internal/repository"
+)
 
 // This file will not be regenerated automatically.
 //

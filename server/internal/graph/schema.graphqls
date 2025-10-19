@@ -1,5 +1,6 @@
 type Query {
   appointments: [Appointment!]!
+  appointmentsByDay(date: String!): DailyAppointments!
 }
 
 type Mutation {
@@ -10,8 +11,39 @@ type Mutation {
 type Appointment {
   id: ID!
   clientName: String!
+  """
+  Format: YYYY-MM-DD
+  """
   date: String!
+  """
+  Format: HH:MM
+  """
   time: String!
+}
+
+type DailyAppointments {
+  date: String!
+  groups: [AppointmentGroup!]!
+}
+
+type AppointmentGroup {
+  period: TimeOfDay!
+  appointments: [Appointment!]!
+}
+
+enum TimeOfDay {
+  """
+  06:00 - 11:59
+  """
+  MORNING
+  """
+  12:00 - 17:59
+  """
+  AFTERNOON
+  """
+  18:00 - 23:59
+  """
+  EVENING
 }
 
 input NewAppointmentInput {
