@@ -31,7 +31,7 @@ const (
 	morningStartHour   = 9
 	afternoonStartHour = 13
 	eveningStartHour   = 19
-	eveningEndHour     = 22
+	eveningEndHour     = 21
 )
 
 type AppointmentGroup struct {
@@ -61,7 +61,7 @@ func GetTimeOfDay(timeStr string) (TimeOfDay, error) {
 	case hour >= eveningStartHour && hour < eveningEndHour:
 		return Evening, nil
 	default:
-		return "", fmt.Errorf("time %s is outside business hours (09:00-22:00)", timeStr)
+		return "", fmt.Errorf("time %s is outside business hours (09:00-21:00)", timeStr)
 	}
 }
 
