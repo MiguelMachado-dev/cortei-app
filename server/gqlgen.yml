@@ -129,8 +129,18 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  NewAppointmentInput:
+    model: "cortei-server/internal/domain.NewAppointment"
   Appointment:
     model: cortei-server/internal/domain.Appointment
+  DailyAppointments:
+    model: cortei-server/internal/domain.DailyAppointments
+  AppointmentGroup:
+    model: cortei-server/internal/domain.AppointmentGroup
+  TimeOfDay:
+    model: cortei-server/internal/domain.TimeOfDay
+  ValidationError:
+    model: cortei-server/internal/errors.ValidationError
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID
