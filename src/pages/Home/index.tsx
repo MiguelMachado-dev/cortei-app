@@ -1,5 +1,6 @@
 import { useState } from "react";
 import TimeSelectGroup, { type Items } from "../../components/TimeSelectGroup";
+import Sidebar from "./components/Sidebar";
 
 const Home = () => {
   const [value, setValue] = useState<string | null>(null);
@@ -23,7 +24,7 @@ const Home = () => {
 
   return (
     <div className="font-catamaran flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-800 antialiased">
-      <p>test</p>
+      <Sidebar />
       <TimeSelectGroup
         items={items}
         value={value}
