@@ -42,7 +42,7 @@ A GraphQL-based appointment management system built with Go, using gqlgen for Gr
 - [Docker Compose](https://docs.docker.com/compose/install/) 2.0 or higher
 
 ### Using Go Directly
-- Go 1.23 or higher
+- Go 1.25.1 or higher
 - Git
 - GCC compiler (for SQLite CGO support)
 
@@ -131,6 +131,16 @@ docker-compose -f docker-compose.dev.yml up -d
 
 # View logs
 docker-compose -f docker-compose.dev.yml logs -f
+```
+
+Alternative (Compose v2 using `docker compose`):
+
+```bash
+# Build only the dev server service image
+docker compose -f docker-compose.dev.yml build cortei-server
+
+# Start only the dev server service
+docker compose -f docker-compose.dev.yml up cortei-server
 ```
 
 **Como funciona:**
@@ -617,7 +627,7 @@ go vet ./...
 - **Date Format**: `YYYY-MM-DD` (e.g., `2025-10-19`)
 - **Time Format**: `HH:MM` (24-hour format, e.g., `14:30`)
 
-## � Docker Configuration
+## 🐳 Docker Configuration
 
 ### Dockerfile Features
 
@@ -658,7 +668,7 @@ When using `docker-compose.yml`:
 | `ENVIRONMENT`        | `production`                | Application environment  |
 | `MAX_DB_CONNECTIONS` | `10`                        | Max database connections |
 
-## �🛑 Graceful Shutdown
+## 🛑 Graceful Shutdown
 
 The server supports graceful shutdown. Press `CTRL+C` to initiate:
 
