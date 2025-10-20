@@ -95,6 +95,19 @@ func (r *sqliteRepository) Create(ctx context.Context, app *domain.Appointment) 
 	}
 	defer tx.Rollback()
 
+	const availabilityQuery = `SELECT COUNT(1)
+							   FROM appointments
+							   WHERE date = ? AND time = ?`
+
+	var count int
+	if err := tx.QueryRowContext(ctx, availabilityQuery, app.Date, app.Time).Scan(&count); err != nil {
+		return nil, fmt.Errorf("failed to verify availability: %w", err)
+	}
+
+	if count > 0 {
+		return nil, &errors.ValidationError{Field: "time", Message: "a booking already exists for this date and time"}
+	}
+
 	app.ID = uuid.NewString()
 	app.CreatedAt = time.Now()
 

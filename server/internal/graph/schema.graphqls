@@ -1,6 +1,7 @@
 type Query {
   appointments: [Appointment!]!
   appointmentsByDay(date: String!): DailyAppointments!
+  availableTimesByDay(date: String!): AvailableTimes!
 }
 
 type Mutation {
@@ -24,6 +25,16 @@ type Appointment {
 type DailyAppointments {
   date: String!
   groups: [AppointmentGroup!]!
+}
+
+type AvailableTimes {
+  date: String!
+  times: [TimeSlot!]!
+}
+
+type TimeSlot {
+  time: String!
+  isAvailable: Boolean!
 }
 
 type AppointmentGroup {

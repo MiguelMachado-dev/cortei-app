@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -77,6 +78,31 @@ func (r *queryResolver) AppointmentsByDay(ctx context.Context, date string) (*do
 	dailyAppointments := domain.GroupAppointmentsByDay(date, appointmentValues)
 
 	return &dailyAppointments, nil
+}
+
+// AvailableTimesByDay is the resolver for the availableTimesByDay field.
+func (r *queryResolver) AvailableTimesByDay(ctx context.Context, date string) (*domain.AvailableTimes, error) {
+	trimmedDate := strings.TrimSpace(date)
+	if trimmedDate == "" {
+		return nil, &apperrors.ValidationError{Field: "date", Message: "cannot be empty"}
+	}
+
+	if _, err := time.Parse("2006-01-02", trimmedDate); err != nil {
+		return nil, &apperrors.ValidationError{Field: "date", Message: "must be in YYYY-MM-DD format"}
+	}
+
+	appointments, err := r.Repo.GetByDay(ctx, trimmedDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get appointments for date %s: %w", trimmedDate, err)
+	}
+
+	appointmentValues := make([]domain.Appointment, len(appointments))
+	for i, app := range appointments {
+		appointmentValues[i] = *app
+	}
+
+	availableTimes := domain.CalculateAvailableTimes(trimmedDate, appointmentValues)
+	return &availableTimes, nil
 }
 
 // Mutation returns MutationResolver implementation.

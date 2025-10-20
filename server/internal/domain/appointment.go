@@ -31,7 +31,12 @@ const (
 	morningStartHour   = 9
 	afternoonStartHour = 13
 	eveningStartHour   = 19
-	eveningEndHour     = 21
+	eveningEndHour     = 22
+)
+
+const (
+	BusinessOpeningHour = morningStartHour
+	BusinessClosingHour = eveningEndHour - 1
 )
 
 type AppointmentGroup struct {
@@ -43,6 +48,28 @@ type DailyAppointments struct {
 	Date   string             `json:"date"`
 	Groups []AppointmentGroup `json:"groups"`
 }
+
+type TimeSlot struct {
+	Time        string `json:"time"`
+	IsAvailable bool   `json:"isAvailable"`
+}
+
+type AvailableTimes struct {
+	Date  string     `json:"date"`
+	Times []TimeSlot `json:"times"`
+}
+
+var defaultDailyTimeSlots = func() []string {
+	slots := make([]string, 0, eveningEndHour-morningStartHour)
+	start := time.Date(2000, time.January, 1, morningStartHour, 0, 0, 0, time.UTC)
+
+	for start.Hour() < eveningEndHour {
+		slots = append(slots, start.Format("15:04"))
+		start = start.Add(time.Hour)
+	}
+
+	return slots
+}()
 
 // GetTimeOfDay determines the time period based on the hour
 func GetTimeOfDay(timeStr string) (TimeOfDay, error) {
@@ -61,7 +88,7 @@ func GetTimeOfDay(timeStr string) (TimeOfDay, error) {
 	case hour >= eveningStartHour && hour < eveningEndHour:
 		return Evening, nil
 	default:
-		return "", fmt.Errorf("time %s is outside business hours (09:00-21:00)", timeStr)
+		return "", fmt.Errorf("time %s is outside business hours (%02d:00-%02d:00)", timeStr, BusinessOpeningHour, BusinessClosingHour)
 	}
 }
 
@@ -95,5 +122,28 @@ func GroupAppointmentsByDay(date string, appointments []Appointment) DailyAppoin
 	return DailyAppointments{
 		Date:   date,
 		Groups: groups,
+	}
+}
+
+func CalculateAvailableTimes(date string, appointments []Appointment) AvailableTimes {
+	occupied := make(map[string]struct{}, len(appointments))
+
+	for _, appointment := range appointments {
+		occupied[appointment.Time] = struct{}{}
+	}
+
+	slots := make([]TimeSlot, 0, len(defaultDailyTimeSlots))
+
+	for _, slot := range defaultDailyTimeSlots {
+		_, taken := occupied[slot]
+		slots = append(slots, TimeSlot{
+			Time:        slot,
+			IsAvailable: !taken,
+		})
+	}
+
+	return AvailableTimes{
+		Date:  date,
+		Times: slots,
 	}
 }
