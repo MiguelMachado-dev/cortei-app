@@ -1,0 +1,39 @@
+services:
+  cortei-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: cortei-server-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - DB_PATH=/app/data/appointments.db
+      - LOG_LEVEL=debug
+      - ENVIRONMENT=development
+      - MAX_DB_CONNECTIONS=10
+    volumes:
+      # Bind mount do código-fonte (hot-reload)
+      - ./server:/app
+      # Volume nomeado para o diretório tmp (evita conflitos)
+      - go-build-cache:/app/tmp
+      # Volume para dados persistentes
+      - app_data_dev:/app/data
+      # Volume para cache do Go (acelera builds)
+      - go-mod-cache:/go/pkg/mod
+    networks:
+      - cortei-network-dev
+    stdin_open: true
+    tty: true
+
+volumes:
+  app_data_dev:
+    driver: local
+  go-build-cache:
+    driver: local
+  go-mod-cache:
+    driver: local
+
+networks:
+  cortei-network-dev:
+    driver: bridge

@@ -1,0 +1,44 @@
+# Production Docker Compose Configuration
+# For development with hot-reload, use: docker-compose -f docker-compose.dev.yml up
+
+services:
+  cortei-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: cortei-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - DB_PATH=/app/data/appointments.db
+      - LOG_LEVEL=info
+      - ENVIRONMENT=production
+      - MAX_DB_CONNECTIONS=10
+    volumes:
+      - app_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - cortei-network
+
+volumes:
+  app_data:
+    driver: local
+
+networks:
+  cortei-network:
+    driver: bridge
