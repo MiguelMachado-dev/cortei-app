@@ -1,25 +1,12 @@
 import { DatePickerDemo } from "@/components/DatePicker";
+import LoadingSidebar from "@/components/LoadingSidebar";
 import TimeSelectGroup, { type Items } from "@/components/TimeSelectGroup";
-import { GET_AVAILABLE_TIME } from "@/graphql/queries";
-import { useQuery } from "@apollo/client/react";
+import {
+  useGetAvailableTimeQuery,
+  type GetAvailableTimeQuery,
+} from "@/graphql/__generated__/types";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
-
-type TimeSlot = {
-  time: string;
-  isAvailable: boolean;
-};
-
-type AvailableTimesData = {
-  availableTimesByDay: {
-    date: string;
-    times: TimeSlot[];
-  };
-};
-
-type AvailableTimesVars = {
-  date: string;
-};
 
 const Sidebar = () => {
   const [date, setDate] = useState<Date>();
@@ -30,15 +17,13 @@ const Sidebar = () => {
     [date],
   );
 
-  const { loading, error, data } = useQuery<
-    AvailableTimesData,
-    AvailableTimesVars
-  >(GET_AVAILABLE_TIME, {
+  const { loading, error, data } = useGetAvailableTimeQuery({
     variables: { date: formattedDate ?? "" },
     skip: !formattedDate,
   });
 
-  const availableTimes: TimeSlot[] = data?.availableTimesByDay?.times ?? [];
+  const availableTimes = (data?.availableTimesByDay?.times ??
+    []) as GetAvailableTimeQuery["availableTimesByDay"]["times"];
 
   const items: Items = availableTimes.map(({ time, isAvailable }) => ({
     label: time,
@@ -46,10 +31,12 @@ const Sidebar = () => {
     isDisabled: !isAvailable,
   }));
 
-  console.log(items);
+  if (loading) {
+    return <LoadingSidebar />;
+  }
 
   return (
-    <aside>
+    <aside className="bg-gray-700">
       <div>
         <h2>Agende um atendimento</h2>
         <p>
