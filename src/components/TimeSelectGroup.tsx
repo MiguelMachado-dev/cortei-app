@@ -1,38 +1,56 @@
+import type { GetAvailableTimeQuery } from "@/graphql/__generated__/types";
 import TimeSelect from "./TimeSelect";
 
 export type Items = Array<{
-  value: string;
-  label: string;
-  isDisabled: boolean;
+  period: string;
+  times: GetAvailableTimeQuery["availableTimesByDay"]["groups"][0]["times"];
 }>;
 
 interface TimeSelectGroupProps {
   name: string;
-  items: Items;
+  timeGroups: Items;
   value: string | null;
   onChange: (event: string) => void;
+  selectedDate?: Date;
 }
+
+const periodMap: Record<string, string> = {
+  MORNING: "Manhã",
+  AFTERNOON: "Tarde",
+  EVENING: "Noite",
+};
 
 const TimeSelectGroup = ({
   name,
-  items,
+  timeGroups,
   value,
   onChange,
+  selectedDate,
 }: TimeSelectGroupProps) => {
   return (
-    <div className="flex flex-row gap-2">
-      {items &&
-        items.map((item) => (
-          <TimeSelect
-            key={item.value}
-            name={name}
-            value={item.value}
-            id={name + item.value}
-            checked={value === item.value}
-            onChange={(e) => onChange(e.target.value)}
-            labelText={item.label}
-            isDisabled={item.isDisabled}
-          />
+    <div className="flex flex-col gap-3">
+      {timeGroups &&
+        timeGroups.map((group) => (
+          <div key={group.period}>
+            <h3 className="mb-2 text-sm leading-none font-normal text-gray-300">
+              {periodMap[group.period] || group.period}
+            </h3>
+            <div className="grid grid-cols-4 gap-2">
+              {group.times.map((timeSlot) => (
+                <TimeSelect
+                  key={timeSlot.time}
+                  name={name}
+                  value={timeSlot.time}
+                  id={name + timeSlot.time}
+                  checked={value === timeSlot.time}
+                  onChange={(e) => onChange(e.target.value)}
+                  labelText={timeSlot.time}
+                  isDisabled={!timeSlot.isAvailable}
+                  selectedDate={selectedDate}
+                />
+              ))}
+            </div>
+          </div>
         ))}
     </div>
   );
