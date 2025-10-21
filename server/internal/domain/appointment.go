@@ -65,6 +65,12 @@ type AvailableTimes struct {
 	Groups []AvailableTimeGroup `json:"groups"`
 }
 
+type InvalidPeriodEntry struct {
+	Time   string
+	Source string
+	Reason string
+}
+
 // AvailableTimesFlat represents the flat version of available times (for internal use)
 type AvailableTimesFlat struct {
 	Date  string     `json:"date"`
@@ -104,25 +110,63 @@ func GetTimeOfDay(timeStr string) (TimeOfDay, error) {
 	}
 }
 
-// GroupAppointmentsByDay groups appointments by time periods
-func GroupAppointmentsByDay(date string, appointments []Appointment) DailyAppointments {
-	// Use a map for O(1) group lookup
-	groupMap := map[TimeOfDay][]Appointment{
-		Morning:   {},
-		Afternoon: {},
-		Evening:   {},
+func describeAppointment(app Appointment) string {
+	if app.ID != "" {
+		return fmt.Sprintf("appointment:%s", app.ID)
+	}
+	if app.ClientName != "" {
+		return fmt.Sprintf("appointment for %s", app.ClientName)
+	}
+	return "appointment"
+}
+
+func describeTimeSlot(slot TimeSlot) string {
+	if slot.ClientName != nil && *slot.ClientName != "" {
+		return fmt.Sprintf("slot held by %s", *slot.ClientName)
+	}
+	return "available time slot"
+}
+
+type periodGrouping[T any] struct {
+	groups  map[TimeOfDay][]T
+	invalid []InvalidPeriodEntry
+}
+
+func partitionByPeriod[T any](items []T, extractTime func(T) string, describe func(T) string) periodGrouping[T] {
+	grouping := periodGrouping[T]{
+		groups: map[TimeOfDay][]T{
+			Morning:   {},
+			Afternoon: {},
+			Evening:   {},
+		},
+		invalid: make([]InvalidPeriodEntry, 0),
 	}
 
-	// Group appointments by time period
-	for _, appointment := range appointments {
-		period, err := GetTimeOfDay(appointment.Time)
+	for _, item := range items {
+		timeValue := extractTime(item)
+		period, err := GetTimeOfDay(timeValue)
 		if err != nil {
-			// Optionally log the error, skip, or handle as needed
-			// For example, continue to next appointment
+			grouping.invalid = append(grouping.invalid, InvalidPeriodEntry{
+				Time:   timeValue,
+				Source: describe(item),
+				Reason: err.Error(),
+			})
 			continue
 		}
-		groupMap[period] = append(groupMap[period], appointment)
+		grouping.groups[period] = append(grouping.groups[period], item)
 	}
+
+	return grouping
+}
+
+var periodOrder = []TimeOfDay{Morning, Afternoon, Evening}
+
+// GroupAppointmentsByDay groups appointments by time periods and reports invalid entries
+func GroupAppointmentsByDay(date string, appointments []Appointment) (DailyAppointments, []InvalidPeriodEntry) {
+	grouping := partitionByPeriod(appointments, func(app Appointment) string {
+		return app.Time
+	}, describeAppointment)
+	groupMap := grouping.groups
 
 	// Build groups slice from map
 	groups := []AppointmentGroup{
@@ -134,7 +178,7 @@ func GroupAppointmentsByDay(date string, appointments []Appointment) DailyAppoin
 	return DailyAppointments{
 		Date:   date,
 		Groups: groups,
-	}
+	}, grouping.invalid
 }
 
 // calculateAvailableTimesFlat calculates available time slots in flat format
@@ -176,26 +220,24 @@ func CalculateAvailableTimes(date string, appointments []Appointment) AvailableT
 }
 
 // GroupAvailableTimesByDay returns available times grouped by time periods
-func GroupAvailableTimesByDay(date string, appointments []Appointment) AvailableTimes {
+func GroupAvailableTimesByDay(date string, appointments []Appointment) (AvailableTimes, []InvalidPeriodEntry) {
+	appointmentGrouping := partitionByPeriod(appointments, func(app Appointment) string {
+		return app.Time
+	}, describeAppointment)
+	validAppointments := make([]Appointment, 0, len(appointments)-len(appointmentGrouping.invalid))
+	for _, period := range periodOrder {
+		validAppointments = append(validAppointments, appointmentGrouping.groups[period]...)
+	}
+
 	// Calculate all available time slots
-	availableTimes := calculateAvailableTimesFlat(date, appointments)
+	availableTimes := calculateAvailableTimesFlat(date, validAppointments)
 
-	// Use a map for O(1) group lookup
-	groupMap := map[TimeOfDay][]TimeSlot{
-		Morning:   {},
-		Afternoon: {},
-		Evening:   {},
-	}
+	slotGrouping := partitionByPeriod(availableTimes.Times, func(slot TimeSlot) string {
+		return slot.Time
+	}, describeTimeSlot)
+	groupMap := slotGrouping.groups
 
-	// Group available time slots by time period
-	for _, slot := range availableTimes.Times {
-		period, err := GetTimeOfDay(slot.Time)
-		if err != nil {
-			// Skip times outside business hours
-			continue
-		}
-		groupMap[period] = append(groupMap[period], slot)
-	}
+	invalid := append(appointmentGrouping.invalid, slotGrouping.invalid...)
 
 	// Build groups slice from map
 	groups := []AvailableTimeGroup{
@@ -207,5 +249,5 @@ func GroupAvailableTimesByDay(date string, appointments []Appointment) Available
 	return AvailableTimes{
 		Date:   date,
 		Groups: groups,
-	}
+	}, invalid
 }

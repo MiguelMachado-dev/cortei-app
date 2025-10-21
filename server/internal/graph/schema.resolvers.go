@@ -11,6 +11,7 @@ import (
 	"cortei-server/internal/validation"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -61,48 +62,81 @@ func (r *queryResolver) Appointments(ctx context.Context) ([]*domain.Appointment
 
 // AppointmentsByDay is the resolver for the appointmentsByDay field.
 func (r *queryResolver) AppointmentsByDay(ctx context.Context, date string) (*domain.DailyAppointments, error) {
-	if strings.TrimSpace(date) == "" {
-		return nil, &apperrors.ValidationError{Field: "date", Message: "cannot be empty"}
-	}
-
-	appointments, err := r.Repo.GetByDay(ctx, date)
+	normalizedDate, err := normalizeDate(date)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get appointments for date %s: %w", date, err)
+		return nil, err
 	}
 
-	appointmentValues := make([]domain.Appointment, len(appointments))
-	for i, app := range appointments {
-		appointmentValues[i] = *app
+	appointments, err := r.Repo.GetByDay(ctx, normalizedDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get appointments for date %s: %w", normalizedDate, err)
 	}
 
-	dailyAppointments := domain.GroupAppointmentsByDay(date, appointmentValues)
+	appointmentValues := toAppointmentValues(appointments)
+
+	dailyAppointments, invalid := domain.GroupAppointmentsByDay(normalizedDate, appointmentValues)
+	logInvalidPeriodEntries("AppointmentsByDay", normalizedDate, invalid)
 
 	return &dailyAppointments, nil
 }
 
 // AvailableTimesByDay is the resolver for the availableTimesByDay field.
 func (r *queryResolver) AvailableTimesByDay(ctx context.Context, date string) (*domain.AvailableTimes, error) {
-	trimmedDate := strings.TrimSpace(date)
-	if trimmedDate == "" {
-		return nil, &apperrors.ValidationError{Field: "date", Message: "cannot be empty"}
-	}
-
-	if _, err := time.Parse("2006-01-02", trimmedDate); err != nil {
-		return nil, &apperrors.ValidationError{Field: "date", Message: "must be in YYYY-MM-DD format"}
-	}
-
-	appointments, err := r.Repo.GetByDay(ctx, trimmedDate)
+	normalizedDate, err := normalizeDate(date)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get appointments for date %s: %w", trimmedDate, err)
+		return nil, err
 	}
 
-	appointmentValues := make([]domain.Appointment, len(appointments))
-	for i, app := range appointments {
-		appointmentValues[i] = *app
+	appointments, err := r.Repo.GetByDay(ctx, normalizedDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get appointments for date %s: %w", normalizedDate, err)
 	}
 
-	availableTimes := domain.GroupAvailableTimesByDay(trimmedDate, appointmentValues)
+	appointmentValues := toAppointmentValues(appointments)
+
+	availableTimes, invalid := domain.GroupAvailableTimesByDay(normalizedDate, appointmentValues)
+	logInvalidPeriodEntries("AvailableTimesByDay", normalizedDate, invalid)
 	return &availableTimes, nil
+}
+
+func normalizeDate(date string) (string, error) {
+	trimmed := strings.TrimSpace(date)
+	if trimmed == "" {
+		return "", &apperrors.ValidationError{Field: "date", Message: "cannot be empty"}
+	}
+
+	if _, err := time.Parse("2006-01-02", trimmed); err != nil {
+		return "", &apperrors.ValidationError{Field: "date", Message: "must be in YYYY-MM-DD format"}
+	}
+
+	return trimmed, nil
+}
+
+func toAppointmentValues(appointments []*domain.Appointment) []domain.Appointment {
+	values := make([]domain.Appointment, 0, len(appointments))
+	for _, app := range appointments {
+		if app == nil {
+			continue
+		}
+		values = append(values, *app)
+	}
+	return values
+}
+
+func logInvalidPeriodEntries(operation, date string, invalid []domain.InvalidPeriodEntry) {
+	if len(invalid) == 0 {
+		return
+	}
+
+	for _, entry := range invalid {
+		slog.Warn("Skipping entry outside scheduling periods",
+			"operation", operation,
+			"date", date,
+			"time", entry.Time,
+			"source", entry.Source,
+			"reason", entry.Reason,
+		)
+	}
 }
 
 // Mutation returns MutationResolver implementation.
