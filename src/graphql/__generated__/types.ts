@@ -47,10 +47,16 @@ export type AppointmentGroup = {
   period: TimeOfDay;
 };
 
+export type AvailableTimeGroup = {
+  __typename?: "AvailableTimeGroup";
+  period: TimeOfDay;
+  times: Array<TimeSlot>;
+};
+
 export type AvailableTimes = {
   __typename?: "AvailableTimes";
   date: Scalars["String"]["output"];
-  times: Array<TimeSlot>;
+  groups: Array<AvailableTimeGroup>;
 };
 
 export type DailyAppointments = {
@@ -105,6 +111,7 @@ export enum TimeOfDay {
 
 export type TimeSlot = {
   __typename?: "TimeSlot";
+  clientName?: Maybe<Scalars["String"]["output"]>;
   isAvailable: Scalars["Boolean"]["output"];
   time: Scalars["String"]["output"];
 };
@@ -117,11 +124,14 @@ export type GetAvailableTimeQuery = {
   __typename?: "Query";
   availableTimesByDay: {
     __typename?: "AvailableTimes";
-    date: string;
-    times: Array<{
-      __typename?: "TimeSlot";
-      time: string;
-      isAvailable: boolean;
+    groups: Array<{
+      __typename?: "AvailableTimeGroup";
+      period: TimeOfDay;
+      times: Array<{
+        __typename?: "TimeSlot";
+        time: string;
+        isAvailable: boolean;
+      }>;
     }>;
   };
 };
@@ -129,10 +139,12 @@ export type GetAvailableTimeQuery = {
 export const GetAvailableTimeDocument = gql`
   query GetAvailableTime($date: String!) {
     availableTimesByDay(date: $date) {
-      date
-      times {
-        time
-        isAvailable
+      groups {
+        period
+        times {
+          time
+          isAvailable
+        }
       }
     }
   }

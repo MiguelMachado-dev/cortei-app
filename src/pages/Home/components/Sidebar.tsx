@@ -1,6 +1,6 @@
-import { DatePickerDemo } from "@/components/DatePicker";
-import LoadingSidebar from "@/components/LoadingSidebar";
-import TimeSelectGroup, { type Items } from "@/components/TimeSelectGroup";
+import { DatePicker } from "@/components/DatePicker";
+import LoadingTimeSelect from "@/components/LoadingTimeSelect";
+import TimeSelectGroup from "@/components/TimeSelectGroup";
 import {
   useGetAvailableTimeQuery,
   type GetAvailableTimeQuery,
@@ -22,45 +22,39 @@ const Sidebar = () => {
     skip: !formattedDate,
   });
 
-  const availableTimes = (data?.availableTimesByDay?.times ??
-    []) as GetAvailableTimeQuery["availableTimesByDay"]["times"];
-
-  const items: Items = availableTimes.map(({ time, isAvailable }) => ({
-    label: time,
-    value: time,
-    isDisabled: !isAvailable,
-  }));
-
-  if (loading) {
-    return <LoadingSidebar />;
-  }
+  const timeGroups = (data?.availableTimesByDay?.groups ??
+    []) as GetAvailableTimeQuery["availableTimesByDay"]["groups"];
 
   return (
-    <aside className="bg-gray-700">
+    <aside className="flex h-full w-[35%] max-w-[500px] flex-col gap-6 rounded-lg bg-gray-700 p-20">
       <div>
-        <h2>Agende um atendimento</h2>
-        <p>
+        <h2 className="text-3xl font-bold text-gray-100">
+          Agende um atendimento
+        </h2>
+        <p className="text-sm text-gray-300">
           Selecione data, horário e informe o nome do cliente para criar o
           agendamento
         </p>
       </div>
 
       <div>
-        <label>Data</label>
-        <DatePickerDemo date={date} setDate={setDate} />
+        <DatePicker date={date} setDate={setDate} />
       </div>
 
       <div>
-        <h3>Horários</h3>
-        {!formattedDate && <p>Selecione uma data.</p>}
-        {formattedDate && loading && <p>Carregando horários...</p>}
-        {formattedDate && error && <p>Erro ao carregar horários.</p>}
+        <h2 className="mb-2 text-base font-bold text-gray-200">Horários</h2>
+        {!formattedDate && <LoadingTimeSelect />}
+        {formattedDate && loading && <LoadingTimeSelect />}
+        {formattedDate && error && (
+          <p className="font-bold text-gray-200">Erro ao carregar horários.</p>
+        )}
         {formattedDate && !loading && !error && (
           <TimeSelectGroup
-            items={items}
+            timeGroups={timeGroups}
             value={value}
             onChange={setValue}
             name="time"
+            selectedDate={date}
           />
         )}
       </div>
