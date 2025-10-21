@@ -50,11 +50,23 @@ type DailyAppointments struct {
 }
 
 type TimeSlot struct {
-	Time        string `json:"time"`
-	IsAvailable bool   `json:"isAvailable"`
+	Time        string  `json:"time"`
+	IsAvailable bool    `json:"isAvailable"`
+	ClientName  *string `json:"clientName,omitempty"`
+}
+
+type AvailableTimeGroup struct {
+	Period TimeOfDay  `json:"period"`
+	Times  []TimeSlot `json:"times"`
 }
 
 type AvailableTimes struct {
+	Date   string               `json:"date"`
+	Groups []AvailableTimeGroup `json:"groups"`
+}
+
+// AvailableTimesFlat represents the flat version of available times (for internal use)
+type AvailableTimesFlat struct {
 	Date  string     `json:"date"`
 	Times []TimeSlot `json:"times"`
 }
@@ -125,25 +137,75 @@ func GroupAppointmentsByDay(date string, appointments []Appointment) DailyAppoin
 	}
 }
 
-func CalculateAvailableTimes(date string, appointments []Appointment) AvailableTimes {
-	occupied := make(map[string]struct{}, len(appointments))
+// calculateAvailableTimesFlat calculates available time slots in flat format
+func calculateAvailableTimesFlat(date string, appointments []Appointment) AvailableTimesFlat {
+	// Create a map of time to appointment details
+	occupied := make(map[string]Appointment, len(appointments))
 
 	for _, appointment := range appointments {
-		occupied[appointment.Time] = struct{}{}
+		occupied[appointment.Time] = appointment
 	}
 
 	slots := make([]TimeSlot, 0, len(defaultDailyTimeSlots))
 
 	for _, slot := range defaultDailyTimeSlots {
-		_, taken := occupied[slot]
-		slots = append(slots, TimeSlot{
-			Time:        slot,
-			IsAvailable: !taken,
-		})
+		appointment, taken := occupied[slot]
+		if taken {
+			slots = append(slots, TimeSlot{
+				Time:        slot,
+				IsAvailable: false,
+				ClientName:  &appointment.ClientName,
+			})
+		} else {
+			slots = append(slots, TimeSlot{
+				Time:        slot,
+				IsAvailable: true,
+			})
+		}
+	}
+
+	return AvailableTimesFlat{
+		Date:  date,
+		Times: slots,
+	}
+}
+
+// CalculateAvailableTimes calculates available time slots (legacy function for backward compatibility)
+func CalculateAvailableTimes(date string, appointments []Appointment) AvailableTimesFlat {
+	return calculateAvailableTimesFlat(date, appointments)
+}
+
+// GroupAvailableTimesByDay returns available times grouped by time periods
+func GroupAvailableTimesByDay(date string, appointments []Appointment) AvailableTimes {
+	// Calculate all available time slots
+	availableTimes := calculateAvailableTimesFlat(date, appointments)
+
+	// Use a map for O(1) group lookup
+	groupMap := map[TimeOfDay][]TimeSlot{
+		Morning:   {},
+		Afternoon: {},
+		Evening:   {},
+	}
+
+	// Group available time slots by time period
+	for _, slot := range availableTimes.Times {
+		period, err := GetTimeOfDay(slot.Time)
+		if err != nil {
+			// Skip times outside business hours
+			continue
+		}
+		groupMap[period] = append(groupMap[period], slot)
+	}
+
+	// Build groups slice from map
+	groups := []AvailableTimeGroup{
+		{Period: Morning, Times: groupMap[Morning]},
+		{Period: Afternoon, Times: groupMap[Afternoon]},
+		{Period: Evening, Times: groupMap[Evening]},
 	}
 
 	return AvailableTimes{
-		Date:  date,
-		Times: slots,
+		Date:   date,
+		Groups: groups,
 	}
 }

@@ -101,7 +101,7 @@ func (r *queryResolver) AvailableTimesByDay(ctx context.Context, date string) (*
 		appointmentValues[i] = *app
 	}
 
-	availableTimes := domain.CalculateAvailableTimes(trimmedDate, appointmentValues)
+	availableTimes := domain.GroupAvailableTimesByDay(trimmedDate, appointmentValues)
 	return &availableTimes, nil
 }
 

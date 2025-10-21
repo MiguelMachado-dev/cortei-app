@@ -29,12 +29,18 @@ type DailyAppointments {
 
 type AvailableTimes {
   date: String!
+  groups: [AvailableTimeGroup!]!
+}
+
+type AvailableTimeGroup {
+  period: TimeOfDay!
   times: [TimeSlot!]!
 }
 
 type TimeSlot {
   time: String!
   isAvailable: Boolean!
+  clientName: String
 }
 
 type AppointmentGroup {
@@ -44,7 +50,7 @@ type AppointmentGroup {
 
 enum TimeOfDay {
   """
-  06:00 - 11:59
+  09:00 - 11:59
   """
   MORNING
   """
@@ -52,7 +58,7 @@ enum TimeOfDay {
   """
   AFTERNOON
   """
-  18:00 - 23:59
+  18:00 - 21:59
   """
   EVENING
 }

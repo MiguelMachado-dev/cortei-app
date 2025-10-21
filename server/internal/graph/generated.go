@@ -59,9 +59,14 @@ type ComplexityRoot struct {
 		Period       func(childComplexity int) int
 	}
 
+	AvailableTimeGroup struct {
+		Period func(childComplexity int) int
+		Times  func(childComplexity int) int
+	}
+
 	AvailableTimes struct {
-		Date  func(childComplexity int) int
-		Times func(childComplexity int) int
+		Date   func(childComplexity int) int
+		Groups func(childComplexity int) int
 	}
 
 	DailyAppointments struct {
@@ -81,6 +86,7 @@ type ComplexityRoot struct {
 	}
 
 	TimeSlot struct {
+		ClientName  func(childComplexity int) int
 		IsAvailable func(childComplexity int) int
 		Time        func(childComplexity int) int
 	}
@@ -153,18 +159,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.AppointmentGroup.Period(childComplexity), true
 
+	case "AvailableTimeGroup.period":
+		if e.complexity.AvailableTimeGroup.Period == nil {
+			break
+		}
+
+		return e.complexity.AvailableTimeGroup.Period(childComplexity), true
+	case "AvailableTimeGroup.times":
+		if e.complexity.AvailableTimeGroup.Times == nil {
+			break
+		}
+
+		return e.complexity.AvailableTimeGroup.Times(childComplexity), true
+
 	case "AvailableTimes.date":
 		if e.complexity.AvailableTimes.Date == nil {
 			break
 		}
 
 		return e.complexity.AvailableTimes.Date(childComplexity), true
-	case "AvailableTimes.times":
-		if e.complexity.AvailableTimes.Times == nil {
+	case "AvailableTimes.groups":
+		if e.complexity.AvailableTimes.Groups == nil {
 			break
 		}
 
-		return e.complexity.AvailableTimes.Times(childComplexity), true
+		return e.complexity.AvailableTimes.Groups(childComplexity), true
 
 	case "DailyAppointments.date":
 		if e.complexity.DailyAppointments.Date == nil {
@@ -231,6 +250,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.AvailableTimesByDay(childComplexity, args["date"].(string)), true
 
+	case "TimeSlot.clientName":
+		if e.complexity.TimeSlot.ClientName == nil {
+			break
+		}
+
+		return e.complexity.TimeSlot.ClientName(childComplexity), true
 	case "TimeSlot.isAvailable":
 		if e.complexity.TimeSlot.IsAvailable == nil {
 			break
@@ -660,6 +685,72 @@ func (ec *executionContext) fieldContext_AppointmentGroup_appointments(_ context
 	return fc, nil
 }
 
+func (ec *executionContext) _AvailableTimeGroup_period(ctx context.Context, field graphql.CollectedField, obj *domain.AvailableTimeGroup) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AvailableTimeGroup_period,
+		func(ctx context.Context) (any, error) {
+			return obj.Period, nil
+		},
+		nil,
+		ec.marshalNTimeOfDay2corteiᚑserverᚋinternalᚋdomainᚐTimeOfDay,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AvailableTimeGroup_period(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AvailableTimeGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type TimeOfDay does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AvailableTimeGroup_times(ctx context.Context, field graphql.CollectedField, obj *domain.AvailableTimeGroup) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AvailableTimeGroup_times,
+		func(ctx context.Context) (any, error) {
+			return obj.Times, nil
+		},
+		nil,
+		ec.marshalNTimeSlot2ᚕcorteiᚑserverᚋinternalᚋdomainᚐTimeSlotᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AvailableTimeGroup_times(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AvailableTimeGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "time":
+				return ec.fieldContext_TimeSlot_time(ctx, field)
+			case "isAvailable":
+				return ec.fieldContext_TimeSlot_isAvailable(ctx, field)
+			case "clientName":
+				return ec.fieldContext_TimeSlot_clientName(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TimeSlot", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AvailableTimes_date(ctx context.Context, field graphql.CollectedField, obj *domain.AvailableTimes) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -689,23 +780,23 @@ func (ec *executionContext) fieldContext_AvailableTimes_date(_ context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _AvailableTimes_times(ctx context.Context, field graphql.CollectedField, obj *domain.AvailableTimes) (ret graphql.Marshaler) {
+func (ec *executionContext) _AvailableTimes_groups(ctx context.Context, field graphql.CollectedField, obj *domain.AvailableTimes) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_AvailableTimes_times,
+		ec.fieldContext_AvailableTimes_groups,
 		func(ctx context.Context) (any, error) {
-			return obj.Times, nil
+			return obj.Groups, nil
 		},
 		nil,
-		ec.marshalNTimeSlot2ᚕcorteiᚑserverᚋinternalᚋdomainᚐTimeSlotᚄ,
+		ec.marshalNAvailableTimeGroup2ᚕcorteiᚑserverᚋinternalᚋdomainᚐAvailableTimeGroupᚄ,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_AvailableTimes_times(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_AvailableTimes_groups(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "AvailableTimes",
 		Field:      field,
@@ -713,12 +804,12 @@ func (ec *executionContext) fieldContext_AvailableTimes_times(_ context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "time":
-				return ec.fieldContext_TimeSlot_time(ctx, field)
-			case "isAvailable":
-				return ec.fieldContext_TimeSlot_isAvailable(ctx, field)
+			case "period":
+				return ec.fieldContext_AvailableTimeGroup_period(ctx, field)
+			case "times":
+				return ec.fieldContext_AvailableTimeGroup_times(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type TimeSlot", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type AvailableTimeGroup", field.Name)
 		},
 	}
 	return fc, nil
@@ -993,8 +1084,8 @@ func (ec *executionContext) fieldContext_Query_availableTimesByDay(ctx context.C
 			switch field.Name {
 			case "date":
 				return ec.fieldContext_AvailableTimes_date(ctx, field)
-			case "times":
-				return ec.fieldContext_AvailableTimes_times(ctx, field)
+			case "groups":
+				return ec.fieldContext_AvailableTimes_groups(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AvailableTimes", field.Name)
 		},
@@ -1174,6 +1265,35 @@ func (ec *executionContext) fieldContext_TimeSlot_isAvailable(_ context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TimeSlot_clientName(ctx context.Context, field graphql.CollectedField, obj *domain.TimeSlot) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TimeSlot_clientName,
+		func(ctx context.Context) (any, error) {
+			return obj.ClientName, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_TimeSlot_clientName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimeSlot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2772,6 +2892,50 @@ func (ec *executionContext) _AppointmentGroup(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var availableTimeGroupImplementors = []string{"AvailableTimeGroup"}
+
+func (ec *executionContext) _AvailableTimeGroup(ctx context.Context, sel ast.SelectionSet, obj *domain.AvailableTimeGroup) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, availableTimeGroupImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AvailableTimeGroup")
+		case "period":
+			out.Values[i] = ec._AvailableTimeGroup_period(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "times":
+			out.Values[i] = ec._AvailableTimeGroup_times(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var availableTimesImplementors = []string{"AvailableTimes"}
 
 func (ec *executionContext) _AvailableTimes(ctx context.Context, sel ast.SelectionSet, obj *domain.AvailableTimes) graphql.Marshaler {
@@ -2788,8 +2952,8 @@ func (ec *executionContext) _AvailableTimes(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "times":
-			out.Values[i] = ec._AvailableTimes_times(ctx, field, obj)
+		case "groups":
+			out.Values[i] = ec._AvailableTimes_groups(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3053,6 +3217,8 @@ func (ec *executionContext) _TimeSlot(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "clientName":
+			out.Values[i] = ec._TimeSlot_clientName(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3542,6 +3708,54 @@ func (ec *executionContext) marshalNAppointmentGroup2ᚕcorteiᚑserverᚋintern
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNAppointmentGroup2corteiᚑserverᚋinternalᚋdomainᚐAppointmentGroup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNAvailableTimeGroup2corteiᚑserverᚋinternalᚋdomainᚐAvailableTimeGroup(ctx context.Context, sel ast.SelectionSet, v domain.AvailableTimeGroup) graphql.Marshaler {
+	return ec._AvailableTimeGroup(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAvailableTimeGroup2ᚕcorteiᚑserverᚋinternalᚋdomainᚐAvailableTimeGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []domain.AvailableTimeGroup) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAvailableTimeGroup2corteiᚑserverᚋinternalᚋdomainᚐAvailableTimeGroup(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
