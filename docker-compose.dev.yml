@@ -12,26 +12,32 @@ services:
       - LOG_LEVEL=debug
       - ENVIRONMENT=development
       - MAX_DB_CONNECTIONS=10
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./server
+          target: /app
+          ignore:
+            - tmp/
+            - data/
+            - vendor/
+            - "*.db"
+        - action: rebuild
+          path: ./server/go.mod
+        - action: rebuild
+          path: ./server/go.sum
     volumes:
-      # Bind mount do código-fonte (hot-reload)
-      - ./server:/app
-      # Volume nomeado para o diretório tmp (evita conflitos)
-      - go-build-cache:/app/tmp
-      # Volume para dados persistentes
-      - app_data_dev:/app/data
-      # Volume para cache do Go (acelera builds)
       - go-mod-cache:/go/pkg/mod
+      - app_data_dev:/app/data
     networks:
       - cortei-network-dev
     stdin_open: true
     tty: true
 
 volumes:
-  app_data_dev:
-    driver: local
-  go-build-cache:
-    driver: local
   go-mod-cache:
+    driver: local
+  app_data_dev:
     driver: local
 
 networks:
