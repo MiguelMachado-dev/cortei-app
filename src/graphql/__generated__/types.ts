@@ -103,9 +103,9 @@ export type QueryAvailableTimesByDayArgs = {
 export enum TimeOfDay {
   /** 12:00 - 17:59 */
   Afternoon = "AFTERNOON",
-  /** 18:00 - 23:59 */
+  /** 18:00 - 21:59 */
   Evening = "EVENING",
-  /** 06:00 - 11:59 */
+  /** 09:00 - 11:59 */
   Morning = "MORNING",
 }
 
@@ -114,6 +114,21 @@ export type TimeSlot = {
   clientName?: Maybe<Scalars["String"]["output"]>;
   isAvailable: Scalars["Boolean"]["output"];
   time: Scalars["String"]["output"];
+};
+
+export type CreateAppointmentMutationVariables = Exact<{
+  input: NewAppointmentInput;
+}>;
+
+export type CreateAppointmentMutation = {
+  __typename?: "Mutation";
+  createAppointment: {
+    __typename?: "Appointment";
+    id: string;
+    clientName: string;
+    date: string;
+    time: string;
+  };
 };
 
 export type GetAvailableTimeQueryVariables = Exact<{
@@ -136,6 +151,60 @@ export type GetAvailableTimeQuery = {
   };
 };
 
+export const CreateAppointmentDocument = gql`
+  mutation CreateAppointment($input: NewAppointmentInput!) {
+    createAppointment(input: $input) {
+      id
+      clientName
+      date
+      time
+    }
+  }
+`;
+export type CreateAppointmentMutationFn = ApolloReactCommon.MutationFunction<
+  CreateAppointmentMutation,
+  CreateAppointmentMutationVariables
+>;
+
+/**
+ * __useCreateAppointmentMutation__
+ *
+ * To run a mutation, you first call `useCreateAppointmentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAppointmentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAppointmentMutation, { data, loading, error }] = useCreateAppointmentMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateAppointmentMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    CreateAppointmentMutation,
+    CreateAppointmentMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useMutation<
+    CreateAppointmentMutation,
+    CreateAppointmentMutationVariables
+  >(CreateAppointmentDocument, options);
+}
+export type CreateAppointmentMutationHookResult = ReturnType<
+  typeof useCreateAppointmentMutation
+>;
+export type CreateAppointmentMutationResult =
+  ApolloReactCommon.MutationResult<CreateAppointmentMutation>;
+export type CreateAppointmentMutationOptions =
+  ApolloReactCommon.BaseMutationOptions<
+    CreateAppointmentMutation,
+    CreateAppointmentMutationVariables
+  >;
 export const GetAvailableTimeDocument = gql`
   query GetAvailableTime($date: String!) {
     availableTimesByDay(date: $date) {

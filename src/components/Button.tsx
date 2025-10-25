@@ -2,7 +2,7 @@ interface ButtonProps {
   type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   disabled?: boolean;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 const Button = ({
