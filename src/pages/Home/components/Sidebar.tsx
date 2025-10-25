@@ -61,7 +61,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="flex w-full flex-col rounded-xl bg-gray-700 p-6 shadow-lg sm:p-8 lg:h-full lg:w-[38%] lg:max-w-[480px] lg:p-10 xl:p-12">
+    <aside className="flex w-full flex-col rounded-xl bg-gray-700 p-6 shadow-lg sm:p-8 lg:h-full lg:w-[38%] lg:max-w-[480px] lg:self-stretch lg:p-10 xl:p-12">
       <form className="flex flex-col gap-6 sm:gap-8" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-bold text-gray-100 sm:text-3xl">

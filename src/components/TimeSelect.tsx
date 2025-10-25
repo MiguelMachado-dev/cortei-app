@@ -48,7 +48,7 @@ const TimeSelect = ({
         disabled ? "Horário indisponível" : `Selecionar horário ${labelText}`
       }
       className={
-        "cursor-pointer rounded-lg border border-gray-500 bg-gray-600 px-5 py-2 transition-colors hover:bg-gray-500 aria-disabled:cursor-auto aria-disabled:border-gray-600 aria-disabled:bg-transparent data-[checked=true]:border-[color:var(--yellow)]"
+        "cursor-pointer rounded-lg border border-gray-500 bg-gray-600 px-5 py-2 text-center transition-colors hover:bg-gray-500 aria-disabled:cursor-auto aria-disabled:border-gray-600 aria-disabled:bg-transparent data-[checked=true]:border-[color:var(--yellow)]"
       }
     >
       <input
