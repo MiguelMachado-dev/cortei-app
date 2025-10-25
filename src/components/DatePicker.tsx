@@ -29,7 +29,7 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
           <Button
             variant="ghost"
             id="date"
-            className="w-48 items-center justify-between border border-gray-500 font-normal"
+            className="w-48 items-center justify-between border border-gray-500 font-normal text-gray-300"
           >
             <div className="flex items-center gap-2 text-[color:var(--yellow)]">
               <CalendarIcon width={16} height={16} />
@@ -40,7 +40,7 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
             <ChevronDownIcon width={16} height={16} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+        <PopoverContent className="w-auto overflow-hidden p-0 bg-gray-600 border-gray-500" align="start">
           <Calendar
             mode="single"
             selected={date}
