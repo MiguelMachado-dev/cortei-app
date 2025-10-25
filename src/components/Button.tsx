@@ -16,7 +16,7 @@ const Button = ({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className="text-grey-900 w-full max-w-[340px] rounded-lg bg-[color:var(--yellow)] p-[18px] text-sm font-bold uppercase outline-2 outline-transparent transition-all hover:not-disabled:outline-[color:var(--yellow-light)] disabled:cursor-not-allowed disabled:opacity-30 disabled:brightness-50"
+      className="text-grey-900 w-full rounded-lg bg-[color:var(--yellow)] p-[18px] text-sm font-bold uppercase outline-2 outline-transparent transition-all hover:not-disabled:outline-[color:var(--yellow-light)] disabled:cursor-not-allowed disabled:opacity-30 disabled:brightness-50"
     >
       {label}
     </button>

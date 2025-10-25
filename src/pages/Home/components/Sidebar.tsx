@@ -69,10 +69,10 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="flex h-full w-[35%] max-w-[500px] rounded-lg bg-gray-700 p-20">
-      <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-        <div>
-          <h2 className="text-3xl font-bold text-gray-100">
+    <aside className="flex h-full w-full flex-col rounded-xl bg-gray-700 p-6 shadow-lg sm:p-8 lg:h-full lg:w-[38%] lg:max-w-[480px] lg:self-stretch lg:p-10 xl:p-12">
+      <form className="flex flex-col gap-6 sm:gap-8" onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-bold text-gray-100 sm:text-3xl">
             Agende um atendimento
           </h2>
           <p className="text-sm text-gray-300">
@@ -81,12 +81,10 @@ const Sidebar = () => {
           </p>
         </div>
 
-        <div>
-          <DatePicker date={date} setDate={setDate} />
-        </div>
+        <DatePicker date={date} setDate={setDate} />
 
-        <div>
-          <h2 className="mb-2 text-base font-bold text-gray-200">Horários</h2>
+        <div className="flex flex-col gap-3">
+          <h2 className="text-base font-bold text-gray-200">Horários</h2>
           {!formattedDate && <LoadingTimeSelect />}
           {formattedDate && loading && <LoadingTimeSelect />}
           {formattedDate && error && (

@@ -35,7 +35,7 @@ const TimeSelectGroup = ({
             <h3 className="mb-2 text-sm leading-none font-normal text-gray-300">
               {periodMap[group.period] || group.period}
             </h3>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {group.times.map((timeSlot) => (
                 <TimeSelect
                   key={timeSlot.time}
