@@ -36,7 +36,7 @@ const ScheduleSection = ({ groups }: ScheduleSectionProps) => {
           Nenhum agendamento para este dia.
         </p>
       ) : (
-        <div className="flex flex-col gap-6 2xl:grid 2xl:grid-cols-3 2xl:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
           {groups.map((group) => (
             <div
               key={group.period}
