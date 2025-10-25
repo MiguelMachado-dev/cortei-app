@@ -1,10 +1,7 @@
-import type { GetAvailableTimeQuery } from "@/graphql/__generated__/types";
+import type { AvailableTimeGroup, TimeOfDay } from "@/lib/localSchedule";
 import TimeSelect from "./TimeSelect";
 
-export type Items = Array<{
-  period: string;
-  times: GetAvailableTimeQuery["availableTimesByDay"]["groups"][0]["times"];
-}>;
+export type Items = AvailableTimeGroup[];
 
 interface TimeSelectGroupProps {
   name: string;
@@ -14,7 +11,7 @@ interface TimeSelectGroupProps {
   selectedDate?: Date;
 }
 
-const periodMap: Record<string, string> = {
+const periodMap: Record<TimeOfDay, string> = {
   MORNING: "Manhã",
   AFTERNOON: "Tarde",
   EVENING: "Noite",

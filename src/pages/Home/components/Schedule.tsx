@@ -1,6 +1,6 @@
 import { DatePicker } from "@/components/DatePicker";
 import ScheduleSection from "@/components/organisms/ScheduleSection";
-import { useGetAppointmentsByDayQuery } from "@/graphql/__generated__/types";
+import { useLocalAppointmentsByDay } from "@/hooks/useLocalSchedule";
 import useSelectedDate from "@/hooks/useSelectedDate";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -13,10 +13,7 @@ const Schedule = () => {
     [date],
   );
 
-  const { loading, error, data } = useGetAppointmentsByDayQuery({
-    variables: { date: formattedDate ?? "" },
-    skip: !formattedDate,
-  });
+  const { loading, error, data } = useLocalAppointmentsByDay(formattedDate);
 
   return (
     <section className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-28 py-20 2xl:mx-0 2xl:max-w-none 2xl:px-32">
@@ -34,7 +31,7 @@ const Schedule = () => {
         {loading && <p>Carregando...</p>}
         {error && <p>Erro ao listar horários agendados...</p>}
         {data && !error && !loading && (
-          <ScheduleSection groups={data?.appointmentsByDay?.groups ?? []} />
+          <ScheduleSection groups={data.groups ?? []} />
         )}
       </div>
     </section>

@@ -2,16 +2,32 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import TimeSelectGroup, { type Items } from "./TimeSelectGroup";
 
-const items: Items = [
+const timeGroups: Items = [
   {
-    label: "Test",
-    value: "test",
-    isDisabled: true,
+    period: "MORNING",
+    times: [
+      { time: "09:00", isAvailable: true },
+      { time: "10:00", isAvailable: false },
+      { time: "11:00", isAvailable: true },
+      { time: "12:00", isAvailable: true },
+    ],
   },
   {
-    label: "Test 2",
-    value: "test 2",
-    isDisabled: false,
+    period: "AFTERNOON",
+    times: [
+      { time: "13:00", isAvailable: true },
+      { time: "14:00", isAvailable: true },
+      { time: "15:00", isAvailable: false },
+      { time: "16:00", isAvailable: true },
+    ],
+  },
+  {
+    period: "EVENING",
+    times: [
+      { time: "19:00", isAvailable: true },
+      { time: "20:00", isAvailable: true },
+      { time: "21:00", isAvailable: true },
+    ],
   },
 ];
 
@@ -23,15 +39,15 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
-    items: {
+    timeGroups: {
       control: "object",
     },
     onChange: fn(),
   },
   args: {
     name: "storybook",
-    items,
-    value: "test",
+    timeGroups,
+    value: "09:00",
     onChange: fn(),
   },
   decorators: [

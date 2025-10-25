@@ -4,10 +4,9 @@ import LoadingTimeSelect from "@/components/LoadingTimeSelect";
 import TextInput from "@/components/TextInput";
 import TimeSelectGroup from "@/components/TimeSelectGroup";
 import {
-  useCreateAppointmentMutation,
-  useGetAvailableTimeQuery,
-  type GetAvailableTimeQuery,
-} from "@/graphql/__generated__/types";
+  useLocalAvailableTimesByDay,
+  useLocalCreateAppointment,
+} from "@/hooks/useLocalSchedule";
 import useSelectedDate from "@/hooks/useSelectedDate";
 import { format } from "date-fns";
 import { useMemo, useState, type FormEvent } from "react";
@@ -22,16 +21,13 @@ const Sidebar = () => {
     [date],
   );
 
-  const { loading, error, data, refetch } = useGetAvailableTimeQuery({
-    variables: { date: formattedDate ?? "" },
-    skip: !formattedDate,
-  });
+  const { loading, error, data, refetch } =
+    useLocalAvailableTimesByDay(formattedDate);
 
-  const [createAppointment, { loading: createAppointmentLoading }] =
-    useCreateAppointmentMutation();
+  const { createAppointment, loading: createAppointmentLoading } =
+    useLocalCreateAppointment();
 
-  const timeGroups = (data?.availableTimesByDay?.groups ??
-    []) as GetAvailableTimeQuery["availableTimesByDay"]["groups"];
+  const timeGroups = data?.groups ?? [];
 
   const isDisabled = !date || !value || !userName || createAppointmentLoading;
 
@@ -51,16 +47,12 @@ const Sidebar = () => {
 
     try {
       await createAppointment({
-        variables: {
-          input: {
-            clientName,
-            date: formattedDate,
-            time: value,
-          },
-        },
+        clientName,
+        date: formattedDate,
+        time: value,
       });
 
-      await refetch({ date: formattedDate });
+      await refetch();
       setValue(null);
       setUserName("");
     } catch (mutationError) {

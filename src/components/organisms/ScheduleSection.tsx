@@ -1,7 +1,4 @@
-import type {
-  GetAppointmentsByDayQuery,
-  TimeOfDay,
-} from "@/graphql/__generated__/types";
+import type { AppointmentGroup, TimeOfDay } from "@/lib/localSchedule";
 import {
   CloudSunIcon,
   MoonStarsIcon,
@@ -10,7 +7,7 @@ import {
 import type { JSX } from "react";
 
 interface ScheduleSectionProps {
-  groups: GetAppointmentsByDayQuery["appointmentsByDay"]["groups"];
+  groups: AppointmentGroup[];
 }
 
 const ScheduleSection = ({ groups }: ScheduleSectionProps) => {

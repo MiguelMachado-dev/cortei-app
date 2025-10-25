@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
 
 import TextInput from "./TextInput";
 
@@ -17,6 +18,8 @@ const meta = {
   args: {
     placeholder: "Agendar",
     name: "storybook",
+    inputValue: "",
+    setInputValue: fn(),
   },
   decorators: [
     (Story) => (
@@ -30,4 +33,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {},
+};
