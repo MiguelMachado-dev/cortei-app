@@ -131,6 +131,28 @@ export type CreateAppointmentMutation = {
   };
 };
 
+export type GetAppointmentsByDayQueryVariables = Exact<{
+  date: Scalars["String"]["input"];
+}>;
+
+export type GetAppointmentsByDayQuery = {
+  __typename?: "Query";
+  appointmentsByDay: {
+    __typename?: "DailyAppointments";
+    date: string;
+    groups: Array<{
+      __typename?: "AppointmentGroup";
+      period: TimeOfDay;
+      appointments: Array<{
+        __typename?: "Appointment";
+        id: string;
+        clientName: string;
+        time: string;
+      }>;
+    }>;
+  };
+};
+
 export type GetAvailableTimeQueryVariables = Exact<{
   date: Scalars["String"]["input"];
 }>;
@@ -205,6 +227,96 @@ export type CreateAppointmentMutationOptions =
     CreateAppointmentMutation,
     CreateAppointmentMutationVariables
   >;
+export const GetAppointmentsByDayDocument = gql`
+  query GetAppointmentsByDay($date: String!) {
+    appointmentsByDay(date: $date) {
+      date
+      groups {
+        period
+        appointments {
+          id
+          clientName
+          time
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetAppointmentsByDayQuery__
+ *
+ * To run a query within a React component, call `useGetAppointmentsByDayQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAppointmentsByDayQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAppointmentsByDayQuery({
+ *   variables: {
+ *      date: // value for 'date'
+ *   },
+ * });
+ */
+export function useGetAppointmentsByDayQuery(
+  baseOptions: ApolloReactHooks.QueryHookOptions<
+    GetAppointmentsByDayQuery,
+    GetAppointmentsByDayQueryVariables
+  > &
+    (
+      | { variables: GetAppointmentsByDayQueryVariables; skip?: boolean }
+      | { skip: boolean }
+    ),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useQuery<
+    GetAppointmentsByDayQuery,
+    GetAppointmentsByDayQueryVariables
+  >(GetAppointmentsByDayDocument, options);
+}
+export function useGetAppointmentsByDayLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    GetAppointmentsByDayQuery,
+    GetAppointmentsByDayQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useLazyQuery<
+    GetAppointmentsByDayQuery,
+    GetAppointmentsByDayQueryVariables
+  >(GetAppointmentsByDayDocument, options);
+}
+export function useGetAppointmentsByDaySuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetAppointmentsByDayQuery,
+        GetAppointmentsByDayQueryVariables
+      >,
+) {
+  const options =
+    baseOptions === ApolloReactHooks.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useSuspenseQuery<
+    GetAppointmentsByDayQuery,
+    GetAppointmentsByDayQueryVariables
+  >(GetAppointmentsByDayDocument, options);
+}
+export type GetAppointmentsByDayQueryHookResult = ReturnType<
+  typeof useGetAppointmentsByDayQuery
+>;
+export type GetAppointmentsByDayLazyQueryHookResult = ReturnType<
+  typeof useGetAppointmentsByDayLazyQuery
+>;
+export type GetAppointmentsByDaySuspenseQueryHookResult = ReturnType<
+  typeof useGetAppointmentsByDaySuspenseQuery
+>;
+export type GetAppointmentsByDayQueryResult = ApolloReactCommon.QueryResult<
+  GetAppointmentsByDayQuery,
+  GetAppointmentsByDayQueryVariables
+>;
 export const GetAvailableTimeDocument = gql`
   query GetAvailableTime($date: String!) {
     availableTimesByDay(date: $date) {

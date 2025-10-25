@@ -12,24 +12,32 @@ import { useState } from "react";
 interface DatePickerProps {
   date: Date | undefined;
   setDate: (date: Date | undefined) => void;
+  hideLabel?: boolean;
 }
 
-export function DatePicker({ date, setDate }: DatePickerProps) {
+export function DatePicker({
+  date,
+  setDate,
+  hideLabel = false,
+}: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor="date" className="text-base font-bold text-gray-200">
-        Data
-      </Label>
+      {!hideLabel && (
+        <Label htmlFor="date" className="text-base font-bold text-gray-200">
+          Data
+        </Label>
+      )}
+
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
             id="date"
-            className="w-48 items-center justify-between border border-gray-500 font-normal text-gray-300"
+            className="h-12 w-full items-center justify-between border border-gray-500 font-normal text-gray-300"
           >
             <div className="flex items-center gap-2 text-[color:var(--yellow)]">
               <CalendarIcon width={16} height={16} />
@@ -40,7 +48,10 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
             <ChevronDownIcon width={16} height={16} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0 bg-gray-600 border-gray-500" align="start">
+        <PopoverContent
+          className="w-auto overflow-hidden border-gray-500 bg-gray-600 p-0"
+          align="start"
+        >
           <Calendar
             mode="single"
             selected={date}

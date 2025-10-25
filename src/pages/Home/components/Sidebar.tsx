@@ -8,11 +8,12 @@ import {
   useGetAvailableTimeQuery,
   type GetAvailableTimeQuery,
 } from "@/graphql/__generated__/types";
+import useSelectedDate from "@/hooks/useSelectedDate";
 import { format } from "date-fns";
 import { useMemo, useState, type FormEvent } from "react";
 
 const Sidebar = () => {
-  const [date, setDate] = useState<Date>();
+  const { date, setDate } = useSelectedDate();
   const [value, setValue] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("");
 
@@ -69,7 +70,7 @@ const Sidebar = () => {
 
   return (
     <aside className="flex h-full w-[35%] max-w-[500px] rounded-lg bg-gray-700 p-20">
-      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
         <div>
           <h2 className="text-3xl font-bold text-gray-100">
             Agende um atendimento
