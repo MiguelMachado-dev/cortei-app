@@ -27,7 +27,7 @@ export function DatePicker({
   return (
     <div className="flex flex-col gap-2">
       {!hideLabel && (
-        <Label htmlFor="date" className="text-base font-bold text-gray-200">
+        <Label htmlFor="date" className="text-sm font-semibold text-foreground uppercase tracking-wide">
           Data
         </Label>
       )}
@@ -37,11 +37,11 @@ export function DatePicker({
           <Button
             variant="ghost"
             id="date"
-            className="h-12 w-full items-center justify-between border border-gray-500 font-normal text-gray-300"
+            className="h-12 w-full items-center justify-between glass text-foreground hover:bg-white/10 border border-white/20"
           >
-            <div className="flex items-center gap-2 text-[color:var(--yellow)]">
+            <div className="flex items-center gap-2 text-accent">
               <CalendarIcon width={16} height={16} />
-              <p className="self-baseline-last text-sm leading-none text-gray-200">
+              <p className="self-baseline-last text-sm leading-none text-foreground">
                 {date ? date.toLocaleDateString() : "selecione uma data"}
               </p>
             </div>
@@ -49,7 +49,7 @@ export function DatePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto overflow-hidden border-gray-500 bg-gray-600 p-0"
+          className="w-auto overflow-hidden glass-card p-0"
           align="start"
         >
           <Calendar

@@ -47,9 +47,16 @@ const TimeSelect = ({
       title={
         disabled ? "Horário indisponível" : `Selecionar horário ${labelText}`
       }
-      className={
-        "cursor-pointer rounded-lg border border-gray-500 bg-gray-600 px-5 py-2 text-center transition-colors hover:bg-gray-500 aria-disabled:cursor-auto aria-disabled:border-gray-600 aria-disabled:bg-transparent data-[checked=true]:border-[color:var(--yellow)]"
-      }
+      className={`
+        relative cursor-pointer rounded-xl px-4 py-3 text-center transition-all duration-200
+        ${checked 
+          ? 'bg-gradient-to-r from-primary to-accent text-white border-primary shadow-lg scale-105' 
+          : disabled
+            ? 'bg-white/5 border-white/10 text-muted-foreground cursor-not-allowed opacity-50'
+            : 'bg-white/5 border-white/20 text-foreground hover:bg-white/10 hover:border-white/30 hover:scale-[1.02]'
+        }
+        backdrop-blur-sm border
+      `}
     >
       <input
         id={id}
@@ -61,18 +68,12 @@ const TimeSelect = ({
         className="sr-only"
         disabled={disabled}
       />
-      <span
-        className={[
-          "text-base",
-          checked
-            ? "text-[color:var(--yellow)]"
-            : disabled
-              ? "text-gray-500"
-              : "text-gray-200",
-        ].join(" ")}
-      >
+      <span className="relative z-10 font-medium">
         {labelText}
       </span>
+      {checked && (
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary to-accent opacity-20 animate-pulse-slow" />
+      )}
     </label>
   );
 };

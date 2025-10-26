@@ -7,7 +7,7 @@ interface ButtonIconProps {
 const ButtonIcon = ({ onClick }: ButtonIconProps) => {
   return (
     <button
-      className="h-8 w-8 text-[color:var(--yellow)] transition-colors hover:text-[color:var(--yellow-dark)]"
+      className="h-8 w-8 text-error transition-colors hover:text-red-600"
       onClick={onClick}
     >
       <TrashIcon size={32} />

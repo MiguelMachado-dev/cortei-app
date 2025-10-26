@@ -61,28 +61,34 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="flex w-full flex-col rounded-xl bg-gray-700 p-6 shadow-lg sm:p-8 lg:h-full lg:w-[38%] lg:max-w-[480px] lg:self-stretch lg:p-10 xl:p-12">
-      <form className="flex flex-col gap-6 sm:gap-8" onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold text-gray-100 sm:text-3xl">
-            Agende um atendimento
+    <aside className="glass-card rounded-2xl p-6 lg:p-8 h-full">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full" />
+        <div>
+          <h2 className="text-2xl lg:text-3xl font-bold gradient-text">
+            Agendar atendimento
           </h2>
-          <p className="text-sm text-gray-300">
-            Selecione data, horário e informe o nome do cliente para criar o
-            agendamento
-          </p>
+        </div>
+      </div>
+
+      <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <DatePicker date={date} setDate={setDate} />
         </div>
 
-        <DatePicker date={date} setDate={setDate} />
-
-        <div className="flex flex-col gap-3">
-          <h2 className="text-base font-bold text-gray-200">Horários</h2>
+        <div className="space-y-4">
+          <label className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+            <span className="w-2 h-2 bg-primary rounded-full" />
+            Horários disponíveis
+          </label>
           {!formattedDate && <LoadingTimeSelect />}
           {formattedDate && loading && <LoadingTimeSelect />}
           {formattedDate && error && (
-            <p className="font-bold text-gray-200">
-              Erro ao carregar horários.
-            </p>
+            <div className="glass rounded-xl p-4 text-center">
+              <p className="text-error font-medium">
+                Erro ao carregar horários.
+              </p>
+            </div>
           )}
           {formattedDate && !loading && !error && (
             <TimeSelectGroup
@@ -95,13 +101,14 @@ const Sidebar = () => {
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-base font-bold text-gray-200" htmlFor="name">
-            Cliente
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2" htmlFor="name">
+            <span className="w-2 h-2 bg-accent rounded-full" />
+            Nome do cliente
           </label>
           <TextInput
             id="name"
-            placeholder="Nome do cliente"
+            placeholder="Digite o nome completo"
             name="name"
             inputValue={userName}
             setInputValue={setUserName}
@@ -109,7 +116,12 @@ const Sidebar = () => {
           />
         </div>
 
-        <Button label="Agendar" disabled={isDisabled} type="submit" />
+        <Button
+          label="Confirmar agendamento"
+          disabled={isDisabled}
+          type="submit"
+          variant="primary"
+        />
       </form>
     </aside>
   );

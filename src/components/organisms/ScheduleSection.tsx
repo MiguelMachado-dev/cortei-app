@@ -30,54 +30,82 @@ const ScheduleSection = ({ groups }: ScheduleSectionProps) => {
   };
 
   return (
-    <div className="mt-10">
+    <div className="space-y-8">
       {groups.length === 0 ? (
-        <p className="text-sm text-gray-300">
-          Nenhum agendamento para este dia.
-        </p>
+        <div className="glass-card rounded-2xl p-12 text-center">
+          <div className="w-20 h-20 bg-gradient-to-r from-primary to-accent/20 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-xl" />
+          </div>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            Nenhum agendamento para este dia
+          </h3>
+          <p className="text-muted-foreground">
+            A agenda está livre para o dia selecionado
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (
             <div
               key={group.period}
-              className="rounded-lg border border-gray-600"
+              className="glass-card rounded-2xl overflow-hidden hover:scale-[1.02] transition-all duration-300"
             >
-              <div className="flex justify-between border-b border-gray-600 px-5 py-3">
-                <h3 className="flex items-center text-sm font-bold text-[color:var(--yellow)]">
-                  {timeIcon[group.period]}
-                  <span className="ml-3 translate-y-[2px] leading-none text-gray-300">
-                    {dictionary[group.period] ?? group.period}
-                  </span>
-                </h3>
-
-                <p className="text-sm text-gray-400">
-                  {timeRange[group.period]}
-                </p>
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center text-white">
+                      {timeIcon[group.period]}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {dictionary[group.period] ?? group.period}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {timeRange[group.period]}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {group.appointments.length === 0 ? (
-                <div className="flex flex-1 items-center justify-center px-5 py-6">
-                  <p className="text-sm text-gray-300">
-                    Sem agendamentos neste período.
-                  </p>
-                </div>
-              ) : (
-                <ul className="px-5 py-6">
-                  {group.appointments.map((appointment) => (
-                    <li
-                      key={appointment.id}
-                      className="flex items-center gap-5 px-3 py-2 text-sm text-gray-100"
-                    >
-                      <span className="text-base font-bold text-gray-200">
-                        {appointment.time}
-                      </span>
-                      <span className="font-base text-gray-200">
-                        {appointment.clientName}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div className="p-6">
+                {group.appointments.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-white/5 rounded-xl mx-auto mb-3 flex items-center justify-center">
+                      <div className="w-6 h-6 bg-white/20 rounded" />
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      Sem agendamentos neste período
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {group.appointments.map((appointment) => (
+                      <div
+                        key={appointment.id}
+                        className="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-200 group"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 bg-primary rounded-full group-hover:scale-150 transition-transform duration-200" />
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {appointment.clientName}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {appointment.time}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent/20 rounded-lg flex items-center justify-center group-hover:from-primary group-hover:to-accent transition-all duration-200">
+                            <div className="w-4 h-4 bg-gradient-to-r from-primary to-accent rounded" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
